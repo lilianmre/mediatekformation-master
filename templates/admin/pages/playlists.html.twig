@@ -1,0 +1,69 @@
+{% extends 'admin/baseback.html.twig' %}
+
+{% block title %}Back office - Playlists{% endblock %}
+
+{% block body %}
+    <div class="mb-3 mt-3">
+        <a href="{{ path('admin_playlists.add') }}" class="btn btn-success btn-sm">Ajouter une playlist</a>
+    </div>
+
+    <table class="table table-striped">
+        <caption class="visually-hidden">Back office - Liste des playlists</caption>
+        <thead>
+            <tr>
+                <th class="text-left align-top" scope="col">
+                    playlist<br />
+                    <a href="{{ path('admin_playlists.sort', {champ:'name', ordre:'ASC'}) }}" class="btn btn-info btn-sm active"><</a>
+                    <a href="{{ path('admin_playlists.sort', {champ:'name', ordre:'DESC'}) }}" class="btn btn-info btn-sm active">></a>
+                    <form class="form-inline mt-1" method="POST" action="{{ path('admin_playlists.findallcontain', {champ:'name'}) }}">
+                        <div class="form-group mr-1 mb-2">
+                            <input type="text" class="sm" name="recherche" 
+                                   value="{% if valeur|default %}{{ valeur }}{% endif %}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('filtre_name') }}">
+                            <button type="submit" class="btn btn-info mb-2 btn-sm">filtrer</button>
+                        </div>
+                    </form>                    
+                </th>
+                <th class="text-left align-top" scope="col">
+                    nombre de formations<br />
+                    <a href="{{ path('admin_playlists.sort', {champ:'nbFormations', ordre:'ASC'}) }}" class="btn btn-info btn-sm active"><</a>
+                    <a href="{{ path('admin_playlists.sort', {champ:'nbFormations', ordre:'DESC'}) }}" class="btn btn-info btn-sm active">></a>               
+                </th>
+                <th class="text-center align-top" scope="col">
+                    &nbsp;
+                </th>				
+            </tr>
+        </thead>
+        <tbody>
+            {% if playlists|length > 0 %}
+                {% for playlist in playlists %}
+                    <tr class="align-middle">
+                        <td>
+                            <h5 class="text-info">
+                                {{ playlist.name }}
+                            </h5>
+                        </td> 
+                        <td class="text-left">
+                            {{ playlist.formations|length }}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ path('admin_playlists.edit', {id: playlist.id}) }}" class="btn btn-primary btn-sm">Modifier</a>
+                            {% if playlist.formations|length == 0 %}
+                                <form method="POST" onsubmit="return confirm('Confirmer la suppression ?')" action="{{ path('admin_playlists.delete', {id: playlist.id}) }}" class="mt-2 d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_playlist_' ~ playlist.id) }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                                </form>
+                            {% else %}
+                                <button type="button" class="btn btn-danger btn-sm" disabled title="Suppression impossible : formations liées">Supprimer</button>
+                            {% endif %}
+                        </td> 					
+                    </tr>
+                {% endfor %}	
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center">Aucune playlist trouvée.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+{% endblock %}

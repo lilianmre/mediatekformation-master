@@ -1,0 +1,58 @@
+{% extends 'admin/baseback.html.twig' %}
+
+{% block title %}Back office - {{ isEdit ? 'Modifier une playlist' : 'Ajouter une playlist' }}{% endblock %}
+
+{% block body %}
+    <h2 class="mt-3 mb-3">{{ isEdit ? 'Modifier une playlist' : 'Ajouter une playlist' }}</h2>
+
+    {{ form_start(playlistForm) }}
+        <div class="mb-3">
+            {{ form_row(playlistForm.name) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_row(playlistForm.description) }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a href="{{ path('admin_playlists') }}" class="btn btn-secondary">Retour</a>
+    {{ form_end(playlistForm) }}
+
+    {% if isEdit and formations|length > 0 %}
+        <div class="mt-5">
+            <h3>Formations de cette playlist</h3>
+            <table class="table table-sm table-striped">
+                <caption class="visually-hidden">Formations liées à cette playlist</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Titre</th>
+                        <th scope="col">Catégories</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formation in formations %}
+                        <tr>
+                            <td>{{ formation.title }}</td>
+                            <td>
+                                {% for categorie in formation.categories %}
+                                    {{ categorie.name }}
+                                {% endfor %}
+                            </td>
+                            <td>{{ formation.publishedAtString }}</td>
+                            <td>
+                                <a href="{{ path('admin_formations.edit', {id: formation.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elseif isEdit %}
+        <div class="mt-5">
+            <h3>Formations de cette playlist</h3>
+            <p class="text-muted">Aucune formation n'est actuellement liée à cette playlist.</p>
+        </div>
+    {% endif %}
+{% endblock %}
