@@ -21,6 +21,11 @@ class AdminFormationsController extends AbstractController {
 
     private const ADMIN_PAGE_FORMATION = 'admin/pages/formations.html.twig';
     private const ADMIN_PAGE_FORM = 'admin/pages/formation/form.html.twig';
+    private const FILTER_CONFIG = [
+        '' => ['filtre_title'],
+        'playlist' => ['filtre_name'],
+        'categories' => ['filtre_id'],
+    ];
 
     /**
      * @var FormationRepository
@@ -140,57 +145,41 @@ class AdminFormationsController extends AbstractController {
         ]);
     }
 
-    private function validateSortInputs(string $champ, string $ordre, string $table): array {
+    private function validateSortInputs(string $champ, string $ordre, string $table): array
+    {
         $ordre = strtoupper($ordre);
+
         if (!in_array($ordre, ['ASC', 'DESC'], true)) {
             throw new BadRequestHttpException('Ordre de tri invalide.');
         }
 
-        if ('' === $table) {
-            if (!in_array($champ, ['title', 'publishedAt'], true)) {
-                throw new BadRequestHttpException('Champ de tri invalide.');
-            }
-
-            return [$champ, $ordre, $table];
+        if (!isset(self::SORTABLE[$table]) ||
+            !in_array($champ, self::SORTABLE[$table], true)) {
+            throw new BadRequestHttpException('Champ de tri invalide.');
         }
 
-        if ('playlist' === $table && 'name' === $champ) {
-            return [$champ, $ordre, $table];
-        }
-
-        throw new BadRequestHttpException('Tri invalide.');
+        return [$champ, $ordre, $table];
     }
 
-    private function validateFilterInputs(string $champ, string $table): array {
-        if ('' === $table && 'title' === $champ) {
-            return [$champ, $table];
+    private function validateFilterInputs(string $champ, string $table): array
+    {
+        if (
+            !isset(self::FILTER_CONFIG[$table]) ||
+            !in_array($champ, self::FILTERABLE[$table], true)
+        ) {
+            throw new BadRequestHttpException('Filtre invalide.');
         }
 
-        if ('playlist' === $table && 'name' === $champ) {
-            return [$champ, $table];
-        }
-
-        if ('categories' === $table && 'id' === $champ) {
-            return [$champ, $table];
-        }
-
-        throw new BadRequestHttpException('Filtre invalide.');
+        return [$champ, $table];
     }
 
-    private function getFilterTokenId(string $champ, string $table): string {
-        if ('' === $table && 'title' === $champ) {
-            return 'filtre_title';
-        }
-
-        if ('playlist' === $table && 'name' === $champ) {
-            return 'filtre_name';
-        }
-
-        if ('categories' === $table && 'id' === $champ) {
-            return 'filtre_id';
-        }
-
+    private function getFilterTokenId(string $champ, string $table): string
+    {
+    if (!isset(self::FILTER_CONFIG[$table][$champ])) {
         throw new BadRequestHttpException('Token de filtre introuvable.');
+    }
+
+    return self::FILTER_CONFIG[$table][$champ];
     }
 
 }
