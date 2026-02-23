@@ -74,5 +74,5 @@ class FormationsController extends AbstractController {
             'formation' => $formation
         ]);
     }
-    
+
 }

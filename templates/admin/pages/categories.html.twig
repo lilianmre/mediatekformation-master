@@ -1,0 +1,60 @@
+{% extends 'admin/baseback.html.twig' %}
+
+{% block title %}Back office - Catégories{% endblock %}
+
+{% block body %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Ajouter une catégorie</h5>
+        </div>
+        <div class="card-body">
+            {{ form_start(categorieForm, {'attr': {'class': 'd-flex gap-2'}}) }}
+                <div class="flex-grow-1">
+                    {{ form_widget(categorieForm.name, {'attr': {'class': 'form-control form-control-sm', 'placeholder': 'Nom de la catégorie'}}) }}
+                    <div class="text-danger small">{{ form_errors(categorieForm.name) }}</div>
+                </div>
+                <button type="submit" class="btn btn-success btn-sm" style="white-space: nowrap;">Ajouter</button>
+            {{ form_end(categorieForm) }}
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <caption class="visually-hidden">Back office - Liste des catégories</caption>
+        <thead>
+            <tr>
+                <th class="text-left align-top" scope="col">Catégorie</th>
+                <th class="text-left align-top" scope="col">Formations liées</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if categories|length > 0 %}
+                {% for categorie in categories %}
+                    <tr class="align-middle">
+                        <td>
+                            <h5 class="text-info mb-0">
+                                {{ categorie.name }}
+                            </h5>
+                        </td> 
+                        <td class="text-left">
+                            {{ categorie.formations|length }}
+                        </td>
+                        <td class="text-center">
+                            {% if categorie.formations|length == 0 %}
+                                <form method="POST" onsubmit="return confirm('Confirmer la suppression ?')" action="{{ path('admin_categories.delete', {id: categorie.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_categorie_' ~ categorie.id) }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                                </form>
+                            {% else %}
+                                <button type="button" class="btn btn-danger btn-sm" disabled title="Suppression impossible : formations liées">Supprimer</button>
+                            {% endif %}
+                        </td> 					
+                    </tr>
+                {% endfor %}	
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center">Aucune catégorie trouvée.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+{% endblock %}
