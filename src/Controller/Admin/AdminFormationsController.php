@@ -21,10 +21,16 @@ class AdminFormationsController extends AbstractController {
 
     private const ADMIN_PAGE_FORMATION = 'admin/pages/formations.html.twig';
     private const ADMIN_PAGE_FORM = 'admin/pages/formation/form.html.twig';
-    private const FILTER_CONFIG = [
-        '' => ['filtre_title'],
-        'playlist' => ['filtre_name'],
-        'categories' => ['filtre_id'],
+    
+    private const SORTABLE = [
+        '' => ['title', 'publishedAt'],
+        'playlist' => ['name'],
+    ];
+
+    private const FILTERABLE = [
+        '' => ['title'],
+        'playlist' => ['name'],
+        'categories' => ['id'],
     ];
 
     /**
@@ -164,7 +170,7 @@ class AdminFormationsController extends AbstractController {
     private function validateFilterInputs(string $champ, string $table): array
     {
         if (
-            !isset(self::FILTER_CONFIG[$table]) ||
+            !isset(self::FILTERABLE[$table]) ||
             !in_array($champ, self::FILTERABLE[$table], true)
         ) {
             throw new BadRequestHttpException('Filtre invalide.');
@@ -175,11 +181,10 @@ class AdminFormationsController extends AbstractController {
 
     private function getFilterTokenId(string $champ, string $table): string
     {
-    if (!isset(self::FILTER_CONFIG[$table][$champ])) {
-        throw new BadRequestHttpException('Token de filtre introuvable.');
-    }
-
-    return self::FILTER_CONFIG[$table][$champ];
+        if ($table === '') {
+            return 'filtre_' . $champ;
+        }
+        return 'filtre_' . $table . '_' . $champ;
     }
 
 }

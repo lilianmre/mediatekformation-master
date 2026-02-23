@@ -15,9 +15,9 @@ class AdminPlaylistsController extends AbstractController
 {
     private const ADMIN_PAGE_PLAYLIST = 'admin/pages/playlists.html.twig';
     private const ADMIN_PAGE_FORM = 'admin/pages/playlist/form.html.twig';
-    private const SORTABLE_CHAMPS = ['name', 'nbFormations'];
-    private const FILTERABLE_CHAMPS = ['name'];
-    private const ORDERS = ['ASC', 'DESC'];
+    
+    private const SORTABLE = ['name', 'nbFormations'];
+    private const FILTERABLE = ['name'];
 
     private PlaylistRepository $playlistRepository;
 
@@ -134,7 +134,7 @@ class AdminPlaylistsController extends AbstractController
 
     private function validateSortChamp(string $champ): string
     {
-        if (!in_array($champ, self::SORTABLE_CHAMPS, true)) {
+        if (!in_array($champ, self::SORTABLE, true)) {
             throw new BadRequestHttpException('Champ de tri invalide.');
         }
 
@@ -143,7 +143,7 @@ class AdminPlaylistsController extends AbstractController
 
     private function validateFilterChamp(string $champ): string
     {
-        if (!in_array($champ, self::FILTERABLE_CHAMPS, true)) {
+        if (!in_array($champ, self::FILTERABLE, true)) {
             throw new BadRequestHttpException('Champ de filtre invalide.');
         }
 
@@ -154,7 +154,7 @@ class AdminPlaylistsController extends AbstractController
     {
         $ordre = strtoupper($ordre);
 
-        if (!in_array($ordre, self::ORDERS, true)) {
+        if (!in_array($ordre, ['ASC', 'DESC'], true)) {
             throw new BadRequestHttpException('Ordre de tri invalide.');
         }
 

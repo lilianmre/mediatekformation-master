@@ -25,7 +25,7 @@
                         <div class="form-group mr-1 mb-2">
                             <input type="text" class="sm" name="recherche" 
                                    value="{% if valeur|default and table|default and table=='playlist' %}{{ valeur }}{% endif %}">
-                            <input type="hidden" name="_token" value="{{ csrf_token('filtre_name') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('filtre_playlist_name') }}">
                             <button type="submit" class="btn btn-info mb-2 btn-sm">filtrer</button>
                         </div>
                     </form>                    
@@ -43,7 +43,8 @@
                                     value="{{ categorie.id }}">{{ categorie.name }}
                                 </option>
                             {% endfor %}
-                        </select>                    
+                        </select>
+                        <input type="hidden" name="_token" value="{{ csrf_token('filtre_categories_id') }}">
                     </form>            
                 </th>
                 <th class="text-center align-top" scope="col">
