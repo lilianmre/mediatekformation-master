@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Do not rewrite requests already targeting /public
+    RewriteCond %{REQUEST_URI} !^/public/
+
+    # Let Apache serve existing files/directories from project root
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Forward all app routes (e.g. /admin/...) to /public
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
