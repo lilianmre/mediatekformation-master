@@ -25,6 +25,12 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    #[Route('/admin', name: 'admin_home')]
+    public function index(): Response
+    {
+        return $this->redirectToRoute('admin_login');
+    }
+
     #[Route('/admin/logout', name: 'admin_logout')]
     public function logout(): void
     {
