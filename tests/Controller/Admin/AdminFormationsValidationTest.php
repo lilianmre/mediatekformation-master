@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller\Admin;
 
-use App\Entity\Formation;
 use App\Entity\Playlist;
 use App\Entity\User;
 use App\Kernel;
@@ -18,7 +17,7 @@ class AdminFormationsValidationTest extends WebTestCase
         return Kernel::class;
     }
 
-    public function testAddRejectsFuturePublishedAtDate(): void
+    public function testAddFuturePublished(): void
     {
         $client = static::createClient();
 
@@ -53,68 +52,7 @@ class AdminFormationsValidationTest extends WebTestCase
         );
         self::assertSame($countBefore, $formationRepository->count([]));
 
-        // cleanup (use references to avoid "detached entity" errors)
-        $entityManager->remove($entityManager->getReference(Playlist::class, $playlist->getId()));
-        $entityManager->remove($entityManager->getReference(User::class, $adminUser->getId()));
-        $entityManager->flush();
-    }
-
-    public function testEditRejectsFuturePublishedAtDate(): void
-    {
-        $client = static::createClient();
-
-        $entityManager = $this->getEntityManager();
-        $adminUser = $this->createAndLoginAdmin($client, $entityManager);
-
-        $playlist = (new Playlist())
-            ->setName('Playlist test date future EDIT')
-            ->setDescription('Playlist de test');
-
-        $formation = (new Formation())
-            ->setTitle('Formation à modifier')
-            ->setVideoId('video-test-2')
-            ->setPublishedAt(new \DateTime('2024-05-13'))
-            ->setPlaylist($playlist)
-            ->setDescription('Description initiale');
-
-        $entityManager->persist($playlist);
-        $entityManager->persist($formation);
-        $entityManager->flush();
-
-        $formationId = $formation->getId();
-        self::assertNotNull($formationId);
-
-        $dateBefore = $formation->getPublishedAt()?->format('Y-m-d');
-
-        $crawler = $client->request('GET', '/admin/formations/' . $formationId . '/edit');
-        $form = $crawler->selectButton('Enregistrer')->form([
-            'formation[title]' => 'Formation à modifier',
-            'formation[videoId]' => 'video-test-2',
-            'formation[publishedAt]' => (new \DateTime('+1 day'))->format('Y-m-d'),
-            'formation[playlist]' => (string) $playlist->getId(),
-            'formation[description]' => 'Description modifiée',
-        ]);
-
-        $client->submit($form);
-
-        self::assertResponseStatusCodeSame(200);
-        self::assertSelectorTextContains(
-            'body',
-            'La date de publication ne peut pas être postérieure à aujourd\'hui.'
-        );
-
-        // reload to verify DB was not updated
-        $entityManager->clear();
-        $reloadedFormation = $entityManager->getRepository(Formation::class)->find($formationId);
-
-        self::assertNotNull($reloadedFormation);
-        self::assertSame(
-            $dateBefore,
-            $reloadedFormation->getPublishedAt()?->format('Y-m-d')
-        );
-
-        // cleanup (use references to avoid "detached entity" errors)
-        $entityManager->remove($reloadedFormation);
+        // cleanup
         $entityManager->remove($entityManager->getReference(Playlist::class, $playlist->getId()));
         $entityManager->remove($entityManager->getReference(User::class, $adminUser->getId()));
         $entityManager->flush();

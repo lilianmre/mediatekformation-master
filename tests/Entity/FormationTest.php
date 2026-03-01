@@ -7,14 +7,14 @@ use PHPUnit\Framework\TestCase;
 
 class FormationTest extends TestCase
 {
-    public function testGetPublishedAtStringReturnsEmptyStringWhenDateIsNull(): void
+    public function testGetPublishedAtStringEmpty(): void
     {
         $formation = new Formation();
 
         self::assertSame('', $formation->getPublishedAtString());
     }
 
-    public function testGetPublishedAtStringReturnsDateFormatted(): void
+    public function testGetPublishedAtString(): void
     {
         $formation = new Formation();
         $formation->setPublishedAt(new \DateTime('2024-05-13'));
