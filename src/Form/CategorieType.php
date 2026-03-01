@@ -13,15 +13,25 @@ use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Formulaire d'ajout d'une catégorie (avec validation d'unicité du nom).
+ */
 class CategorieType extends AbstractType
 {
     private EntityManagerInterface $entityManager;
 
+    /**
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array<string, mixed> $options
+     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $entityManager = $this->entityManager;
@@ -54,6 +64,9 @@ class CategorieType extends AbstractType
             ]);
     }
 
+    /**
+     * @param OptionsResolver $resolver
+     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

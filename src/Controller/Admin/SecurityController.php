@@ -7,8 +7,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
+/**
+ * Contrôleur gérant l'authentification de l'espace d'administration.
+ */
 class SecurityController extends AbstractController
 {
+    /**
+     * Affiche le formulaire de connexion ou redirige si déjà connecté.
+     *
+     * @param AuthenticationUtils $authenticationUtils
+     * @return Response
+     */
     #[Route('/admin/login', name: 'admin_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -25,12 +34,20 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    /**
+     * Redirige vers la page de connexion depuis la racine admin.
+     *
+     * @return Response
+     */
     #[Route('/admin', name: 'admin_home')]
     public function index(): Response
     {
         return $this->redirectToRoute('admin_login');
     }
 
+    /**
+     * Point de déconnexion intercepté par le firewall Symfony.
+     */
     #[Route('/admin/logout', name: 'admin_logout')]
     public function logout(): void
     {

@@ -14,11 +14,20 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
+    /**
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * Met à jour le mot de passe hashé d'un utilisateur.
+     *
+     * @param PasswordAuthenticatedUserInterface $user
+     * @param string $newHashedPassword
+     */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {

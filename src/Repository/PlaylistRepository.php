@@ -11,27 +11,39 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PlaylistRepository extends ServiceEntityRepository
 {
+    /**
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Playlist::class);
     }
 
+    /**
+     * Persiste et sauvegarde une playlist en base de données.
+     *
+     * @param Playlist $entity
+     */
     public function add(Playlist $entity): void
     {
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * Supprime une playlist de la base de données.
+     *
+     * @param Playlist $entity
+     */
     public function remove(Playlist $entity): void
     {
         $this->getEntityManager()->remove($entity);
         $this->getEntityManager()->flush();
     }
-    
+
     /**
      * Retourne toutes les playlists triées sur le nom de la playlist
-     * @param type $champ
-     * @param type $ordre
+     * @param string $ordre
      * @return Playlist[]
      */
     public function findAllOrderByName($ordre): array{
@@ -45,7 +57,7 @@ class PlaylistRepository extends ServiceEntityRepository
     
     /**
      * Retourne toutes les playlists triées par nombre de formations
-     * @param type $ordre
+     * @param string $ordre
      * @return Playlist[]
      */
     public function findAllOrderByFormationCount($ordre): array{
@@ -61,9 +73,9 @@ class PlaylistRepository extends ServiceEntityRepository
     /**
      * Enregistrements dont un champ contient une valeur
      * ou tous les enregistrements si la valeur est vide
-     * @param type $champ
-     * @param type $valeur
-     * @param type $table si $champ dans une autre table
+     * @param string $champ
+     * @param string $valeur
+     * @param string $table si $champ dans une autre table
      * @return Playlist[]
      */
     public function findByContainValue($champ, $valeur, $table=""): array{

@@ -43,17 +43,34 @@ class AdminFormationsController extends AbstractController {
      */
     private $categorieRepository;
 
+    /**
+     * @param FormationRepository $formationRepository
+     * @param CategorieRepository $categorieRepository
+     */
     public function __construct(FormationRepository $formationRepository, CategorieRepository $categorieRepository) {
         $this->formationRepository = $formationRepository;
         $this->categorieRepository = $categorieRepository;
     }
 
+    /**
+     * Affiche la liste de toutes les formations (espace admin).
+     *
+     * @return Response
+     */
     #[Route('/admin/formations', name: 'admin_formations')]
     public function index(): Response {
         $formations = $this->formationRepository->findAll();
         return $this->renderAdminFormations($formations);
     }
 
+    /**
+     * Affiche les formations admin triées selon un champ et un ordre donnés.
+     *
+     * @param string $champ
+     * @param string $ordre
+     * @param string $table table jointe si le champ appartient à une entité liée
+     * @return Response
+     */
     #[Route('/admin/formations/tri/{champ}/{ordre}/{table}', name: 'admin_formations.sort', defaults: ['table' => ''])]
     #[Route('/admin/formations/tri/{champ}/{ordre}', name: 'admin_formations.sort.notable')]
     public function sort($champ, $ordre, $table = ""): Response {
@@ -62,6 +79,14 @@ class AdminFormationsController extends AbstractController {
         return $this->renderAdminFormations($formations);
     }
 
+    /**
+     * Filtre les formations admin dont un champ contient la valeur soumise.
+     *
+     * @param string $champ
+     * @param Request $request
+     * @param string $table table jointe si le champ appartient à une entité liée
+     * @return Response
+     */
     #[Route('/admin/formations/recherche/{champ}/{table}', name: 'admin_formations.findallcontain', defaults: ['table' => ''])]
     #[Route('/admin/formations/recherche/{champ}', name: 'admin_formations.findallcontain.notable')]
     public function findAllContain($champ, Request $request, $table = ""): Response {
@@ -80,6 +105,12 @@ class AdminFormationsController extends AbstractController {
         return $this->renderAdminFormations($formations, $valeur, $table);
     }
 
+    /**
+     * Affiche et traite le formulaire d'ajout d'une formation.
+     *
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/admin/formations/add', name: 'admin_formations.add', methods: ['GET', 'POST'])]
     public function add(Request $request): Response {
         $formation = new Formation();
@@ -87,6 +118,13 @@ class AdminFormationsController extends AbstractController {
         return $this->handleForm($formation, $request, 'Formation ajoutée.');
     }
 
+    /**
+     * Supprime une formation.
+     *
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/admin/formations/delete/{id}', name: 'admin_formations.delete', methods: ['POST'])]
     public function delete(int $id, Request $request): Response {
         if (!$this->isCsrfTokenValid('delete_formation_'.$id, $request->request->get('_token'))) {
@@ -111,6 +149,13 @@ class AdminFormationsController extends AbstractController {
         return $this->redirectToRoute('admin_formations');
     }
 
+    /**
+     * Affiche et traite le formulaire de modification d'une formation.
+     *
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/admin/formations/{id}/edit', name: 'admin_formations.edit', methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request): Response {
         $formation = $this->formationRepository->find($id);

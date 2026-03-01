@@ -17,8 +17,15 @@ use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 
+/**
+ * Formulaire de création et de modification d'une formation.
+ */
 class FormationType extends AbstractType
 {
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array<string, mixed> $options
+     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -85,6 +92,9 @@ class FormationType extends AbstractType
             ]);
     }
 
+    /**
+     * @param OptionsResolver $resolver
+     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

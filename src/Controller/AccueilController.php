@@ -25,6 +25,11 @@ class AccueilController extends AbstractController{
         $this->repository = $repository;
     }
     
+    /**
+     * Affiche la page d'accueil avec les 2 formations les plus récentes.
+     *
+     * @return Response
+     */
     #[Route('/', name: 'accueil')]
     public function index(): Response{
         $formations = $this->repository->findAllLasted(2);
@@ -32,7 +37,12 @@ class AccueilController extends AbstractController{
             'formations' => $formations
         ]);
     }
-    
+
+    /**
+     * Affiche la page des conditions générales d'utilisation.
+     *
+     * @return Response
+     */
     #[Route('/cgu', name: 'cgu')]
     public function cgu(): Response{
         return $this->render("pages/cgu.html.twig");

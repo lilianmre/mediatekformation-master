@@ -6,8 +6,17 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+/**
+ * Assainit toutes les entrées utilisateur (GET, POST) à chaque requête
+ * en supprimant les balises HTML et les espaces superflus.
+ */
 class InputSanitizerSubscriber implements EventSubscriberInterface
 {
+    /**
+     * Déclare les événements écoutés par ce subscriber.
+     *
+     * @return array<string, mixed>
+     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -15,6 +24,11 @@ class InputSanitizerSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * Nettoie les paramètres de la requête courante.
+     *
+     * @param RequestEvent $event
+     */
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {

@@ -41,6 +41,11 @@ class PlaylistsController extends AbstractController {
         'categories' => ['id'],
     ];
 
+    /**
+     * @param PlaylistRepository $playlistRepository
+     * @param CategorieRepository $categorieRepository
+     * @param FormationRepository $formationRespository
+     */
     public function __construct(PlaylistRepository $playlistRepository,
             CategorieRepository $categorieRepository,
             FormationRepository $formationRespository) {
@@ -50,7 +55,8 @@ class PlaylistsController extends AbstractController {
     }
     
     /**
-     * @Route("/playlists", name="playlists")
+     * Affiche la liste de toutes les playlists triées par nom.
+     *
      * @return Response
      */
     #[Route('/playlists', name: 'playlists')]
@@ -63,6 +69,13 @@ class PlaylistsController extends AbstractController {
         ]);
     }
 
+    /**
+     * Affiche les playlists triées selon un champ et un ordre donnés.
+     *
+     * @param string $champ
+     * @param string $ordre
+     * @return Response
+     */
     #[Route('/playlists/tri/{champ}/{ordre}', name: 'playlists.sort')]
     public function sort($champ, $ordre): Response{
         [$champ, $ordre] = $this->validateSortInputs((string) $champ, (string) $ordre);
@@ -79,6 +92,14 @@ class PlaylistsController extends AbstractController {
         ]);
     }
 
+    /**
+     * Filtre les playlists dont un champ contient la valeur soumise.
+     *
+     * @param string $champ
+     * @param Request $request
+     * @param string $table table jointe si le champ appartient à une entité liée
+     * @return Response
+     */
     #[Route('/playlists/recherche/{champ}/{table}', name: 'playlists.findallcontain', defaults: ['table' => ''])]
     #[Route('/playlists/recherche/{champ}', name: 'playlists.findallcontain.notable')]
     public function findAllContain($champ, Request $request, $table=""): Response{
@@ -103,6 +124,12 @@ class PlaylistsController extends AbstractController {
         ]);
     }
 
+    /**
+     * Affiche le détail d'une playlist avec ses formations et ses catégories.
+     *
+     * @param int $id
+     * @return Response
+     */
     #[Route('/playlists/playlist/{id}', name: 'playlists.showone')]
     public function showOne($id): Response{
         $playlist = $this->playlistRepository->find($id);

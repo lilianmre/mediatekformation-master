@@ -7,6 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * Entité représentant un utilisateur administrateur de l'application.
+ */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -25,16 +28,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @return string|null
+     */
     public function getUsername(): ?string
     {
         return $this->username;
     }
 
+    /**
+     * @param string $username
+     * @return static
+     */
     public function setUsername(string $username): static
     {
         $this->username = $username;
@@ -42,11 +55,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Retourne l'identifiant unique de l'utilisateur (nom d'utilisateur).
+     *
+     * @return string
+     */
     public function getUserIdentifier(): string
     {
         return (string) $this->username;
     }
 
+    /**
+     * Retourne les rôles de l'utilisateur (ROLE_USER toujours inclus).
+     *
+     * @return array<string>
+     */
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -55,6 +78,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param array<string> $roles
+     * @return static
+     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
@@ -62,11 +89,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword(): string
     {
         return $this->password;
     }
 
+    /**
+     * @param string $password
+     * @return static
+     */
     public function setPassword(string $password): static
     {
         $this->password = $password;
@@ -74,6 +108,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Efface les données sensibles temporaires (aucune ici).
+     */
     public function eraseCredentials(): void {
         // aucun mot de passe non hashé
     }

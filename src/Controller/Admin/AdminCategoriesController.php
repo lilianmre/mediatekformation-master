@@ -10,17 +10,29 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur d'administration des catégories.
+ */
 class AdminCategoriesController extends AbstractController
 {
     private const ADMIN_PAGE_CATEGORIES = 'admin/pages/categories.html.twig';
 
     private CategorieRepository $categorieRepository;
 
+    /**
+     * @param CategorieRepository $categorieRepository
+     */
     public function __construct(CategorieRepository $categorieRepository)
     {
         $this->categorieRepository = $categorieRepository;
     }
 
+    /**
+     * Affiche la liste des catégories et traite le formulaire d'ajout.
+     *
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/admin/categories', name: 'admin_categories', methods: ['GET', 'POST'])]
     public function index(Request $request): Response
     {
@@ -43,6 +55,13 @@ class AdminCategoriesController extends AbstractController
         ]);
     }
 
+    /**
+     * Supprime une catégorie (refusée si elle contient des formations).
+     *
+     * @param Categorie $categorie
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/admin/categories/{id}/delete', name: 'admin_categories.delete', methods: ['POST'])]
     public function delete(Categorie $categorie, Request $request): Response
     {

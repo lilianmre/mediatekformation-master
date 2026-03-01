@@ -39,11 +39,20 @@ class FormationsController extends AbstractController {
         'categories' => ['id'],
     ];
 
+    /**
+     * @param FormationRepository $formationRepository
+     * @param CategorieRepository $categorieRepository
+     */
     public function __construct(FormationRepository $formationRepository, CategorieRepository $categorieRepository) {
         $this->formationRepository = $formationRepository;
         $this->categorieRepository= $categorieRepository;
     }
 
+    /**
+     * Affiche la liste de toutes les formations.
+     *
+     * @return Response
+     */
     #[Route('/formations', name: 'formations')]
     public function index(): Response{
         $formations = $this->formationRepository->findAll();
@@ -54,6 +63,14 @@ class FormationsController extends AbstractController {
         ]);
     }
 
+    /**
+     * Affiche les formations triées selon un champ et un ordre donnés.
+     *
+     * @param string $champ
+     * @param string $ordre
+     * @param string $table table jointe si le champ appartient à une entité liée
+     * @return Response
+     */
     #[Route('/formations/tri/{champ}/{ordre}/{table}', name: 'formations.sort', defaults: ['table' => ''])]
     #[Route('/formations/tri/{champ}/{ordre}', name: 'formations.sort.notable')]
     public function sort($champ, $ordre, $table=""): Response{
@@ -67,6 +84,14 @@ class FormationsController extends AbstractController {
         ]);
     }
 
+    /**
+     * Filtre les formations dont un champ contient la valeur soumise.
+     *
+     * @param string $champ
+     * @param Request $request
+     * @param string $table table jointe si le champ appartient à une entité liée
+     * @return Response
+     */
     #[Route('/formations/recherche/{champ}/{table}', name: 'formations.findallcontain', defaults: ['table' => ''])]
     #[Route('/formations/recherche/{champ}', name: 'formations.findallcontain.notable')]
     public function findAllContain($champ, Request $request, $table=""): Response{
@@ -91,6 +116,12 @@ class FormationsController extends AbstractController {
         ]);
     }
 
+    /**
+     * Affiche le détail d'une formation.
+     *
+     * @param int $id
+     * @return Response
+     */
     #[Route('/formations/formation/{id}', name: 'formations.showone')]
     public function showOne($id): Response{
         $formation = $this->formationRepository->find($id);
