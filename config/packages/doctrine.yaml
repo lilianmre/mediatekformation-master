@@ -1,14 +1,14 @@
 doctrine:
-    dbal:
-        url: '%env(resolve:DATABASE_URL)%'
+  dbal:
+    url: '%env(resolve:DATABASE_URL)%'
+    driver: 'pdo_mysql'
+    # IMPORTANT: configure your server version here or in DATABASE_URL
+    server_version: '8.0'
 
-        # IMPORTANT: You MUST configure your server version,
-        # either here or in the DATABASE_URL env var (see .env file)
-        #server_version: '16'
-
-        profiling_collect_backtrace: '%kernel.debug%'
-        use_savepoints: true
-    orm:
+    profiling_collect_backtrace: '%kernel.debug%'
+    use_savepoints: true
+    
+  orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
         report_fields_where_declared: true
@@ -33,6 +33,10 @@ when@test:
 
 when@prod:
     doctrine:
+        dbal:
+            options:
+                !php/const PDO::MYSQL_ATTR_SSL_CA: '%env(DATABASE_SSL_CA)%'
+                !php/const PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT: '%env(bool:DATABASE_SSL_VERIFY_SERVER_CERT)%'
         orm:
             auto_generate_proxy_classes: false
             proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'

@@ -1,0 +1,108 @@
+name: Build & Deploy Azure Web App
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  WEBAPP_NAME: mediatekformation
+  WEBAPP_URL: https://mediatekformation-hadcdza2hsanhzg2.francecentral-01.azurewebsites.net
+  PHP_VERSION: "8.4"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+          extensions: pdo_mysql, intl, zip
+          coverage: none
+
+      - name: Ensure .env exists for CI
+        run: |
+          if [ ! -f .env ]; then
+            printf "APP_ENV=prod\nAPP_DEBUG=0\nAPP_SECRET=ci-placeholder\nDATABASE_URL=mysql://user:pass@127.0.0.1:3306/db?serverVersion=8.0&charset=utf8mb4\n" > .env
+          fi
+          # Add Azure-specific vars missing from the committed .env
+          grep -q "APP_ENV" .env          || echo "APP_ENV=prod"                      >> .env
+          grep -q "DATABASE_SSL_CA"       .env || echo "DATABASE_SSL_CA="             >> .env
+          grep -q "DATABASE_SSL_VERIFY"   .env || echo "DATABASE_SSL_VERIFY_SERVER_CERT=0" >> .env
+          test -f .env && echo ".env OK"
+
+      - name: Install dependencies (prod)
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress --no-scripts
+
+      - name: Setup Node.js (if package.json exists)
+        if: ${{ hashFiles('package.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      - name: Build frontend assets (if package.json exists)
+        if: ${{ hashFiles('package.json') != '' }}
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile || yarn install
+          yarn build
+
+      - name: Warm up Symfony cache (prod)
+        run: php bin/console cache:warmup --env=prod --no-debug
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p build
+          rsync -av \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'tests/' \
+            --exclude 'docs/' \
+            --exclude 'var/cache/dev/' \
+            --exclude 'var/log/' \
+            --exclude 'node_modules/' \
+            --exclude '.env.local' \
+            --exclude '.env.*.local' \
+            . build/
+          cd build
+          zip -r ../release.zip .
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          package: release.zip
+
+      - name: Smoke check (non-blocking)
+        continue-on-error: true
+        run: |
+          URL="${{ env.WEBAPP_URL }}"
+          echo "Testing URL: $URL"
+
+          for i in 1 2 3 4 5; do
+            if curl -fsS "$URL" > /dev/null; then
+              echo "Web app reachable"
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "Warning: Web app not reachable yet (non-blocking)."
+
+
