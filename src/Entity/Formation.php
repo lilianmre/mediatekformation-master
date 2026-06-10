@@ -47,11 +47,18 @@ class Formation
     private Collection $categories;
 
     /**
-     * Initialise la collection de catégories.
+     * @var Collection<int, Inscription>
+     */
+    #[ORM\OneToMany(targetEntity: Inscription::class, mappedBy: 'formation')]
+    private Collection $inscriptions;
+
+    /**
+     * Initialise les collections de catégories et d'inscriptions.
      */
     public function __construct()
     {
         $this->categories = new ArrayCollection();
+        $this->inscriptions = new ArrayCollection();
     }
 
     /**
@@ -219,5 +226,13 @@ class Formation
         $this->categories->removeElement($category);
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Inscription>
+     */
+    public function getInscriptions(): Collection
+    {
+        return $this->inscriptions;
     }
 }

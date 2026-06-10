@@ -2,8 +2,11 @@
 
 namespace App\Tests\Repository;
 
+use App\Entity\EtatAvancement;
 use App\Entity\Formation;
+use App\Entity\Inscription;
 use App\Entity\Playlist;
+use App\Entity\User;
 use App\Repository\FormationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -187,5 +190,50 @@ class FormationRepositoryTest extends KernelTestCase
         $this->entityManager->flush();
     }
 
+    // findAllByEtatForUser()
 
+    public function testFindAllByEtatForUser(): void
+    {
+        $playlist = $this->createPlaylist('P');
+        $formationTerminee = $this->createFormation($playlist, 'AAAAAA');
+        $formationEnCours = $this->createFormation($playlist, 'BBBBBB');
+        $formationNonInscrite = $this->createFormation($playlist, 'CCCCCC');
+
+        $user = (new User())
+            ->setUsername('user_etat_test_' . uniqid())
+            ->setRoles(['ROLE_USER'])
+            ->setPassword('test');
+        $this->entityManager->persist($user);
+
+        $inscriptionTerminee = (new Inscription())->setUser($user)->setFormation($formationTerminee);
+        $inscriptionTerminee->setEtat(EtatAvancement::TERMINEE);
+
+        $inscriptionEnCours = (new Inscription())->setUser($user)->setFormation($formationEnCours);
+        $inscriptionEnCours->setEtat(EtatAvancement::EN_COURS);
+
+        $this->entityManager->persist($inscriptionTerminee);
+        $this->entityManager->persist($inscriptionEnCours);
+        $this->entityManager->flush();
+
+        $resultsTerminee = $this->formationRepository->findAllByEtatForUser($user, 'terminee');
+        $resultsNonInscrit = $this->formationRepository->findAllByEtatForUser($user, 'non_inscrit');
+
+        self::assertCount(1, $resultsTerminee);
+        self::assertSame($formationTerminee->getId(), $resultsTerminee[0]->getId());
+
+        $idsNonInscrit = array_map(fn(Formation $f) => $f->getId(), $resultsNonInscrit);
+        self::assertContains($formationNonInscrite->getId(), $idsNonInscrit);
+        self::assertNotContains($formationTerminee->getId(), $idsNonInscrit);
+        self::assertNotContains($formationEnCours->getId(), $idsNonInscrit);
+
+        // cleanup
+        $this->entityManager->remove($inscriptionTerminee);
+        $this->entityManager->remove($inscriptionEnCours);
+        $this->entityManager->remove($user);
+        $this->entityManager->remove($formationTerminee);
+        $this->entityManager->remove($formationEnCours);
+        $this->entityManager->remove($formationNonInscrite);
+        $this->entityManager->remove($playlist);
+        $this->entityManager->flush();
+    }
 }

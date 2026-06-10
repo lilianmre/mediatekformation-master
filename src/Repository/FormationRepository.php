@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\EtatAvancement;
 use App\Entity\Formation;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -93,6 +95,29 @@ class FormationRepository extends ServiceEntityRepository
         }
     }
     
+    /**
+     * Retourne les formations dont l'état de suivi de l'utilisateur correspond à la
+     * valeur donnée ("non_inscrit" ou une valeur de EtatAvancement).
+     * @param User $user
+     * @param string $etat
+     * @return Formation[]
+     */
+    public function findAllByEtatForUser(User $user, string $etat): array{
+        $queryBuilder = $this->createQueryBuilder('f')
+                ->leftJoin('f.inscriptions', 'i', 'WITH', 'i.user = :user')
+                ->setParameter('user', $user)
+                ->orderBy('f.publishedAt', 'DESC');
+
+        if ($etat === 'non_inscrit') {
+            $queryBuilder->andWhere('i.id IS NULL');
+        } else {
+            $queryBuilder->andWhere('i.etat = :etat')
+                    ->setParameter('etat', EtatAvancement::from($etat));
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
     /**
      * Retourne les n formations les plus récentes
      * @param int $nb

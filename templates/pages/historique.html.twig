@@ -1,0 +1,59 @@
+{% extends "basefront.html.twig" %}
+
+{% block title %}Historique{% endblock %}
+
+{% block body %}
+    <h4 class="text-info mt-3">Historique de mon suivi</h4>
+
+    <div class="mb-3">
+        {% if termineesUniquement %}
+            <a href="{{ path('historique') }}" class="btn btn-outline-info btn-sm">Toutes les formations suivies</a>
+        {% else %}
+            <a href="{{ path('historique.terminees') }}" class="btn btn-outline-info btn-sm">Formations terminées (les plus récentes d'abord)</a>
+        {% endif %}
+    </div>
+
+    <table class="table table-striped">
+        <caption class="visually-hidden">Historique de mes formations suivies</caption>
+        <thead>
+            <tr>
+                <th scope="col">formation</th>
+                <th class="text-center" scope="col">état</th>
+                <th class="text-center" scope="col">inscrit le</th>
+                <th class="text-center" scope="col">terminé le</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inscription in inscriptions %}
+                <tr class="align-middle">
+                    <td>
+                        <a href="{{ path('formations.showone', {id: inscription.formation.id}) }}">
+                            {{ inscription.formation.title }}
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-{{ inscription.etat.value == 'terminee' ? 'success' : (inscription.etat.value == 'en_cours' ? 'warning' : 'secondary') }}">
+                            {{ inscription.etat.libelle }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {{ inscription.dateInscription|date('d/m/Y') }}
+                    </td>
+                    <td class="text-center">
+                        {{ inscription.dateValidation ? inscription.dateValidation|date('d/m/Y') : '--' }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        {% if termineesUniquement %}
+                            Aucune formation terminée pour le moment.
+                        {% else %}
+                            Vous n'avez encore suivi aucune formation.
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

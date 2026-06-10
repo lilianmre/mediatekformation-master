@@ -38,4 +38,15 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
     }
+
+    /**
+     * Persiste et sauvegarde un utilisateur en base de données.
+     *
+     * @param User $entity
+     */
+    public function add(User $entity): void
+    {
+        $this->getEntityManager()->persist($entity);
+        $this->getEntityManager()->flush();
+    }
 }

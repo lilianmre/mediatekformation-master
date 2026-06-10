@@ -56,6 +56,23 @@
                         <a href="{{ path('formations.sort', {champ:'publishedAt', ordre:'DESC'}) }}" class="btn btn-info btn-sm active">></a>
                     </div>
                 </th>
+                {% if app.user %}
+                    <th class="text-center align-top" scope="col">
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <span>mon suivi</span>
+                            <form class="d-flex" method="POST" action="{{ path('formations.findbyetat') }}">
+                                <select class="form-select form-select-sm" name="recherche" onchange="this.form.submit()">
+                                    <option value="">tous</option>
+                                    <option value="non_inscrit" {{ table|default=='etat' and valeur|default=='non_inscrit' ? 'selected' : '' }}>Non inscrit</option>
+                                    {% for etatPossible in etatsAvancement %}
+                                        <option value="{{ etatPossible.value }}" {{ table|default=='etat' and valeur|default==etatPossible.value ? 'selected' : '' }}>{{ etatPossible.libelle }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="_token" value="{{ csrf_token('filtre_etat') }}">
+                            </form>
+                        </div>
+                    </th>
+                {% endif %}
                 <th class="text-center align-top" scope="col">
                     &nbsp;
                 </th>
@@ -80,6 +97,17 @@
                     <td class="text-center">
                         {{ formation.publishedatstring }}
                     </td>
+                    {% if app.user %}
+                        <td class="text-center">
+                            {% if etats[formation.id] is defined %}
+                                <span class="badge bg-{{ etats[formation.id].value == 'terminee' ? 'success' : (etats[formation.id].value == 'en_cours' ? 'warning' : 'secondary') }}">
+                                    {{ etats[formation.id].libelle }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">Non inscrit</span>
+                            {% endif %}
+                        </td>
+                    {% endif %}
                     <td class="text-center">
                         {% if formation.miniature %}
                             <a href="{{ path('formations.showone', {id:formation.id}) }}">

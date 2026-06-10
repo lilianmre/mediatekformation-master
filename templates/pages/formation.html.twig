@@ -28,6 +28,49 @@
             <br /><br />
             <strong>description :</strong><br />
                 {{ formation.description|nl2br }}
+
+            <hr>
+            <h5>Mon suivi</h5>
+            {% if app.user %}
+                {% if inscription %}
+                    <p>
+                        <strong>Statut : </strong>
+                        <span class="badge bg-{{ inscription.etat.value == 'terminee' ? 'success' : (inscription.etat.value == 'en_cours' ? 'warning' : 'secondary') }}">
+                            {{ inscription.etat.libelle }}
+                        </span>
+                    </p>
+                    {% if inscription.etat.suivant %}
+                        <form method="post" action="{{ path('formations.etat', {id: formation.id}) }}" class="row g-2 align-items-center mb-2">
+                            <div class="col-auto">
+                                <select name="etat" class="form-select">
+                                    <option value="{{ inscription.etat.value }}" selected>{{ inscription.etat.libelle }}</option>
+                                    <option value="{{ inscription.etat.suivant.value }}">{{ inscription.etat.suivant.libelle }}</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <input type="hidden" name="_token" value="{{ csrf_token('etat' ~ formation.id) }}">
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </form>
+                        <p class="text-muted"><small>La progression suit l'ordre : non commencée → en cours → terminée.</small></p>
+                    {% endif %}
+                    <p>
+                        Inscrit le : {{ inscription.dateInscription|date('d/m/Y') }}<br>
+                        Terminé le : {{ inscription.dateValidation ? inscription.dateValidation|date('d/m/Y') : '--' }}
+                    </p>
+                {% else %}
+                    <form method="post" action="{{ path('formations.inscription', {id: formation.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('inscription' ~ formation.id) }}">
+                        <button type="submit" class="btn btn-primary">S'inscrire à cette formation</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <p>
+                    Connectez-vous ou créez un compte pour suivre votre progression sur cette formation.<br>
+                    <a href="{{ path('app_login') }}" class="btn btn-sm btn-primary mt-2">Connexion</a>
+                    <a href="{{ path('app_register') }}" class="btn btn-sm btn-secondary mt-2">Créer un compte</a>
+                </p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
